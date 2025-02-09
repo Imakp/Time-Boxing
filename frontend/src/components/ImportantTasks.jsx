@@ -51,7 +51,7 @@ export default function ImportantTasks({
               {task.text}
             </span>
             <button
-              onClick={() => deleteTask(index)}
+              onClick={() => deleteTask(task.id)}
               className="text-slate-400 hover:text-slate-600 dark:text-gray-400 dark:hover:text-gray-200 p-1 rounded-full hover:bg-slate-100 dark:hover:bg-gray-700 transition-colors"
             >
               <svg
@@ -110,7 +110,7 @@ export default function ImportantTasks({
                     </span>
                     <button
                       onClick={() => {
-                        addTask(task);
+                        addTask(task.id);
                         setShowPopup(false);
                       }}
                       className="bg-slate-800 dark:bg-gray-700 text-slate-100 dark:text-gray-200 px-3 py-1 rounded-lg hover:bg-slate-700 dark:hover:bg-gray-600 transition-colors"

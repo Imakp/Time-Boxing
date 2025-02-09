@@ -88,18 +88,18 @@ function App() {
     });
   };
 
-  const deleteAllTask = (index) => {
+  const deleteAllTask = (taskId) => {
     if (!selectedDate) return;
 
-    setTasksByDate({
-      ...tasksByDate,
+    setTasksByDate(prev => ({
+      ...prev,
       [selectedDate]: {
-        ...tasksByDate[selectedDate],
-        allTasks: tasksByDate[selectedDate].allTasks.filter(
-          (_, i) => i !== index
-        ),
+        ...prev[selectedDate],
+        allTasks: prev[selectedDate].allTasks.filter(t => t.id !== taskId),
+        importantTasks: prev[selectedDate].importantTasks.filter(t => t.id !== taskId),
+        dayChartTasks: prev[selectedDate].dayChartTasks.filter(t => t.id !== taskId)
       },
-    });
+    }));
   };
 
   const updateAllTask = (index, newText) => {
@@ -116,36 +116,42 @@ function App() {
     });
   };
 
-  const addImportantTask = (task) => {
+  const addImportantTask = (taskId) => {
     if (!selectedDate) return;
 
-    const currentImportantTasks = tasksByDate[selectedDate].importantTasks;
-    if (
-      currentImportantTasks.length < 3 &&
-      !currentImportantTasks.some((t) => t.id === task.id)
-    ) {
-      setTasksByDate({
-        ...tasksByDate,
-        [selectedDate]: {
-          ...tasksByDate[selectedDate],
-          importantTasks: [...currentImportantTasks, task],
-        },
-      });
-    }
+    setTasksByDate(prev => {
+      const dateTasks = prev[selectedDate] || {
+        allTasks: [],
+        importantTasks: [],
+        dayChartTasks: []
+      };
+      
+      const taskToAdd = dateTasks.allTasks.find(t => t.id === taskId);
+      const isAlreadyImportant = dateTasks.importantTasks.some(t => t.id === taskId);
+
+      if (dateTasks.importantTasks.length < 3 && taskToAdd && !isAlreadyImportant) {
+        return {
+          ...prev,
+          [selectedDate]: {
+            ...dateTasks,
+            importantTasks: [...dateTasks.importantTasks, taskToAdd]
+          }
+        };
+      }
+      return prev;
+    });
   };
 
-  const deleteImportantTask = (index) => {
+  const deleteImportantTask = (taskId) => {
     if (!selectedDate) return;
 
-    setTasksByDate({
-      ...tasksByDate,
+    setTasksByDate(prev => ({
+      ...prev,
       [selectedDate]: {
-        ...tasksByDate[selectedDate],
-        importantTasks: tasksByDate[selectedDate].importantTasks.filter(
-          (_, i) => i !== index
-        ),
-      },
-    });
+        ...prev[selectedDate],
+        importantTasks: prev[selectedDate].importantTasks.filter(t => t.id !== taskId)
+      }
+    }));
   };
 
   const handleDateSelect = (date) => {

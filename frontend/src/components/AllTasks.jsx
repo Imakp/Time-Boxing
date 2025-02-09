@@ -35,7 +35,7 @@ export default function AllTasks({ tasks, addTask, deleteTask, updateTask }) {
         />
         <button
           onClick={handleAddTask}
-          className="w-full sm:w-auto bg-slate-700 dark:bg-gray-600 text-slate-100 px-4 py-2 rounded-lg hover:bg-slate-700 dark:hover:bg-gray-600 transition-colors text-sm md:text-base"
+          className="w-full sm:w-auto bg-slate-800 dark:bg-gray-700 text-slate-100 px-4 py-2 rounded-lg hover:bg-slate-700 dark:hover:bg-gray-600 transition-colors text-sm md:text-base"
         >
           Add
         </button>
