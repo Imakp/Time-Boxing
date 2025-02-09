@@ -47,7 +47,9 @@ export default function ImportantTasks({
             key={task.id}
             className="flex justify-between items-center bg-white dark:bg-gray-800 p-3 rounded-lg shadow-sm"
           >
-            <span className="text-slate-800 dark:text-gray-200">
+            <span
+              className={`${task.completed ? 'line-through text-slate-400 dark:text-gray-500' : 'text-slate-800 dark:text-gray-200'}`}
+            >
               {task.text}
             </span>
             <button
@@ -105,7 +107,9 @@ export default function ImportantTasks({
                     key={task.id}
                     className="flex justify-between items-center p-2 hover:bg-slate-50 dark:hover:bg-gray-800 rounded transition-colors"
                   >
-                    <span className="text-slate-800 dark:text-gray-200 truncate">
+                    <span
+                      className={`${task.completed ? 'line-through text-slate-400 dark:text-gray-500' : 'text-slate-800 dark:text-gray-200'}`}
+                    >
                       {task.text}
                     </span>
                     <button

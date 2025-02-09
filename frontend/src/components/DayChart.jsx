@@ -34,20 +34,19 @@ export default function DayChart({
   });
   const [selectedTask, setSelectedTask] = useState(null);
   const [showEditPopup, setShowEditPopup] = useState(false);
-  const [timeError, setTimeError] = useState('');
+  const [timeError, setTimeError] = useState("");
 
   const handleAddEntry = () => {
     if (newEntry.task && newEntry.startTime && newEntry.endTime) {
       if (!validateTime(newEntry.startTime, newEntry.endTime)) return;
-      
-      // Update existing task instead of creating new one
+
       addTask({
         ...newEntry.task,
         startTime: newEntry.startTime,
         endTime: newEntry.endTime,
-        isTimeBlock: true // Add a marker for time-blocked tasks
+        isTimeBlock: true, 
       });
-      
+
       setShowPopup(false);
       setNewEntry({
         task: null,
@@ -59,7 +58,7 @@ export default function DayChart({
 
   const handleEditEntry = (updatedTask) => {
     if (!validateTime(updatedTask.startTime, updatedTask.endTime)) return;
-    
+
     const taskIndex = tasks.findIndex((t) => t.id === updatedTask.id);
     if (taskIndex > -1) {
       updateTask(taskIndex, updatedTask);
@@ -70,16 +69,17 @@ export default function DayChart({
 
   const validateTime = (start, end) => {
     if (start >= end) {
-      setTimeError('End time must be after start time');
+      setTimeError("End time must be after start time");
       return false;
     }
-    setTimeError('');
+    setTimeError("");
     return true;
   };
 
-  const availableTasks = allTasks.filter(task => 
-    !tasks.some(t => t.id === task.id) || 
-    (selectedTask && task.id === selectedTask.id)
+  const availableTasks = allTasks.filter(
+    (task) =>
+      !tasks.some((t) => t.id === task.id) ||
+      (selectedTask && task.id === selectedTask.id)
   );
 
   return (
@@ -120,10 +120,8 @@ export default function DayChart({
                 task.endTime.split(":")[0] * 60 +
                 Number(task.endTime.split(":")[1]);
 
-              // For left column (0-11:59)
               if (startMinutes < 720) {
-                // 720 minutes = 12 hours
-                const columnEnd = Math.min(endMinutes, 720); // 12:00 in minutes
+                const columnEnd = Math.min(endMinutes, 720);
                 const height = (columnEnd - startMinutes) * (600 / 720);
 
                 return (
@@ -139,7 +137,13 @@ export default function DayChart({
                       height: `${height}px`,
                     }}
                   >
-                    <span className="text-xs text-blue-600 dark:text-blue-300">
+                    <span
+                      className={`text-xs text-blue-600 dark:text-blue-300 ${
+                        task.completed
+                          ? "line-through text-slate-400 dark:text-gray-500"
+                          : ""
+                      }`}
+                    >
                       {task.text}
                     </span>
                   </div>
@@ -160,9 +164,7 @@ export default function DayChart({
                 task.endTime.split(":")[0] * 60 +
                 Number(task.endTime.split(":")[1]);
 
-              // For right column (12:00-23:59)
               if (endMinutes > 720) {
-                // 720 minutes = 12 hours
                 const columnStart = Math.max(startMinutes, 720);
                 const top = (columnStart - 720) * (600 / 720);
                 const height = (endMinutes - columnStart) * (600 / 720);
@@ -180,7 +182,13 @@ export default function DayChart({
                       height: `${height}px`,
                     }}
                   >
-                    <span className="text-xs text-blue-600 dark:text-blue-300">
+                    <span
+                      className={`text-xs text-blue-600 dark:text-blue-300 ${
+                        task.completed
+                          ? "line-through text-slate-400 dark:text-gray-500"
+                          : ""
+                      }`}
+                    >
                       {task.text}
                     </span>
                   </div>
@@ -229,10 +237,10 @@ export default function DayChart({
                     try {
                       setNewEntry({
                         ...newEntry,
-                        task: JSON.parse(e.target.value)
+                        task: JSON.parse(e.target.value),
                       });
                     } catch (error) {
-                      console.error('Invalid JSON input');
+                      console.error("Invalid JSON input");
                     }
                   }}
                 >
@@ -324,12 +332,18 @@ export default function DayChart({
                   className="w-full bg-white dark:bg-gray-800 rounded-lg px-4 py-2 text-slate-800 dark:text-gray-200"
                   value={selectedTask?.id || ""}
                   onChange={(e) => {
-                    const task = allTasks.find(t => t.id === parseInt(e.target.value));
-                    setSelectedTask(task ? 
-                      { ...task, 
-                        startTime: selectedTask?.startTime || "09:00",
-                        endTime: selectedTask?.endTime || "10:00"
-                      } : null);
+                    const task = allTasks.find(
+                      (t) => t.id === parseInt(e.target.value)
+                    );
+                    setSelectedTask(
+                      task
+                        ? {
+                            ...task,
+                            startTime: selectedTask?.startTime || "09:00",
+                            endTime: selectedTask?.endTime || "10:00",
+                          }
+                        : null
+                    );
                   }}
                 >
                   <option value="">Select Task</option>

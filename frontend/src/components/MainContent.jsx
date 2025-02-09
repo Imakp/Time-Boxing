@@ -16,7 +16,7 @@ export default function MainContent({
     <div
       className={`pl-4 pt-16 overflow-hidden transition-margin duration-300
         ${isSidebarOpen ? "lg:ml-64" : "ml-0"}
-        // ml-0
+        {/* ml-0 */}
       `}
     >
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 h-full">

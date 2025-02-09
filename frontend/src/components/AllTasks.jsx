@@ -5,7 +5,7 @@ export default function AllTasks({ tasks, addTask, deleteTask, updateTask }) {
 
   const handleAddTask = () => {
     if (newTask.trim()) {
-      addTask({ id: Date.now(), text: newTask });
+      addTask({ id: Date.now(), text: newTask, completed: false });
       setNewTask("");
     }
   };
@@ -47,11 +47,44 @@ export default function AllTasks({ tasks, addTask, deleteTask, updateTask }) {
             key={task.id}
             className="flex gap-2 items-center bg-white dark:bg-gray-800 p-2 md:p-3 rounded-lg shadow-sm hover:shadow-md transition-shadow"
           >
+            <button
+              onClick={() =>
+                updateTask(task.id, { completed: !task.completed })
+              }
+              className="flex-shrink-0 text-slate-600 dark:text-gray-300 hover:text-slate-800 dark:hover:text-gray-100"
+            >
+              {task.completed ? (
+                <svg
+                  className="w-4 h-4"
+                  fill="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <circle cx="12" cy="12" r="8" />
+                </svg>
+              ) : (
+                <svg
+                  className="w-4 h-4"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth="2"
+                    d="M5 13l4 4L19 7"
+                  />
+                </svg>
+              )}
+            </button>
             <input
-              type="text"
               value={task.text}
-              onChange={(e) => updateTask(index, e.target.value)}
-              className="flex-1 min-w-0 bg-transparent text-sm md:text-base text-slate-800 dark:text-gray-200 focus:outline-none"
+              onChange={(e) => updateTask(task.id, { text: e.target.value })}
+              className={`flex-1 min-w-0 bg-transparent text-sm md:text-base ${
+                task.completed
+                  ? "line-through text-slate-400 dark:text-gray-500"
+                  : "text-slate-800 dark:text-gray-200"
+              } focus:outline-none`}
             />
             <button
               onClick={() => deleteTask(task.id)}

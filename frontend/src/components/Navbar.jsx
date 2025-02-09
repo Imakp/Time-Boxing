@@ -38,7 +38,9 @@ export default function Navbar({
       </div>
 
       <div className="flex items-center space-x-4">
-        <span className="text-slate-600 dark:text-gray-400 hidden sm:block">{currentDate}</span>
+        <span className="text-slate-600 dark:text-gray-400 hidden sm:block">
+          {currentDate}
+        </span>
         <button
           onClick={toggleDarkMode}
           className="p-2 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg"
