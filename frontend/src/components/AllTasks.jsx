@@ -54,7 +54,7 @@ export default function AllTasks({ tasks, addTask, deleteTask, updateTask }) {
               className="flex-1 min-w-0 bg-transparent text-sm md:text-base text-slate-800 dark:text-gray-200 focus:outline-none"
             />
             <button
-              onClick={() => deleteTask(index)}
+              onClick={() => deleteTask(task.id)}
               className="flex-shrink-0 text-slate-400 hover:text-slate-600 dark:text-gray-400 dark:hover:text-gray-200 p-1 rounded-full hover:bg-slate-100 dark:hover:bg-gray-700 transition-colors"
               aria-label="Delete task"
             >

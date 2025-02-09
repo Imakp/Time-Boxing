@@ -34,25 +34,53 @@ export default function DayChart({
   });
   const [selectedTask, setSelectedTask] = useState(null);
   const [showEditPopup, setShowEditPopup] = useState(false);
+  const [timeError, setTimeError] = useState('');
 
   const handleAddEntry = () => {
     if (newEntry.task && newEntry.startTime && newEntry.endTime) {
+      if (!validateTime(newEntry.startTime, newEntry.endTime)) return;
+      
+      // Update existing task instead of creating new one
       addTask({
         ...newEntry.task,
         startTime: newEntry.startTime,
         endTime: newEntry.endTime,
+        isTimeBlock: true // Add a marker for time-blocked tasks
       });
+      
       setShowPopup(false);
+      setNewEntry({
+        task: null,
+        startTime: "09:00",
+        endTime: "10:00",
+      });
     }
   };
 
   const handleEditEntry = (updatedTask) => {
+    if (!validateTime(updatedTask.startTime, updatedTask.endTime)) return;
+    
     const taskIndex = tasks.findIndex((t) => t.id === updatedTask.id);
     if (taskIndex > -1) {
       updateTask(taskIndex, updatedTask);
       setShowEditPopup(false);
+      setSelectedTask(null);
     }
   };
+
+  const validateTime = (start, end) => {
+    if (start >= end) {
+      setTimeError('End time must be after start time');
+      return false;
+    }
+    setTimeError('');
+    return true;
+  };
+
+  const availableTasks = allTasks.filter(task => 
+    !tasks.some(t => t.id === task.id) || 
+    (selectedTask && task.id === selectedTask.id)
+  );
 
   return (
     <div className="my-8 bg-slate-100 dark:bg-gray-900 p-6 rounded-xl shadow-sm border dark:border-gray-800 mr-4">
@@ -197,12 +225,16 @@ export default function DayChart({
                 </label>
                 <select
                   className="w-full bg-white dark:bg-gray-800 rounded-lg px-4 py-2 text-slate-800 dark:text-gray-200"
-                  onChange={(e) =>
-                    setNewEntry({
-                      ...newEntry,
-                      task: JSON.parse(e.target.value),
-                    })
-                  }
+                  onChange={(e) => {
+                    try {
+                      setNewEntry({
+                        ...newEntry,
+                        task: JSON.parse(e.target.value)
+                      });
+                    } catch (error) {
+                      console.error('Invalid JSON input');
+                    }
+                  }}
                 >
                   <option value="">Select Task</option>
                   {allTasks
@@ -290,25 +322,22 @@ export default function DayChart({
                 </label>
                 <select
                   className="w-full bg-white dark:bg-gray-800 rounded-lg px-4 py-2 text-slate-800 dark:text-gray-200"
-                  value={JSON.stringify(selectedTask.task)}
-                  onChange={(e) =>
-                    setSelectedTask({
-                      ...selectedTask,
-                      task: JSON.parse(e.target.value),
-                    })
-                  }
+                  value={selectedTask?.id || ""}
+                  onChange={(e) => {
+                    const task = allTasks.find(t => t.id === parseInt(e.target.value));
+                    setSelectedTask(task ? 
+                      { ...task, 
+                        startTime: selectedTask?.startTime || "09:00",
+                        endTime: selectedTask?.endTime || "10:00"
+                      } : null);
+                  }}
                 >
-                  {allTasks
-                    .filter(
-                      (task) =>
-                        task.id === selectedTask.id ||
-                        !tasks.some((t) => t.id === task.id)
-                    )
-                    .map((task) => (
-                      <option key={task.id} value={JSON.stringify(task)}>
-                        {task.text}
-                      </option>
-                    ))}
+                  <option value="">Select Task</option>
+                  {availableTasks.map((task) => (
+                    <option key={task.id} value={task.id}>
+                      {task.text}
+                    </option>
+                  ))}
                 </select>
               </div>
 
@@ -319,7 +348,7 @@ export default function DayChart({
                   </label>
                   <input
                     type="time"
-                    value={selectedTask.startTime}
+                    value={selectedTask?.startTime}
                     onChange={(e) =>
                       setSelectedTask({
                         ...selectedTask,
@@ -336,7 +365,7 @@ export default function DayChart({
                   </label>
                   <input
                     type="time"
-                    value={selectedTask.endTime}
+                    value={selectedTask?.endTime}
                     onChange={(e) =>
                       setSelectedTask({
                         ...selectedTask,
@@ -355,6 +384,10 @@ export default function DayChart({
                 Save Changes
               </button>
             </div>
+
+            {timeError && (
+              <div className="text-red-500 text-sm mt-2">{timeError}</div>
+            )}
           </div>
         </div>
       )}

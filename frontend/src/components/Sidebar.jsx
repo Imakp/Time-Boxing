@@ -2,17 +2,13 @@ export default function Sidebar({
   isOpen,
   setIsOpen,
   tasks,
+  selectedDate,
+  onDateSelect,
   addTask,
   deleteTask,
 }) {
-  const taskDate = new Date().toLocaleDateString("en-US", {
-    month: "short",
-    day: "numeric",
-  });
-
   return (
     <>
-      {/* Overlay - only show on mobile when sidebar is open */}
       {isOpen && (
         <div
           className="fixed inset-0 bg-black bg-opacity-50 lg:hidden z-30"
@@ -30,7 +26,7 @@ export default function Sidebar({
         <div className="p-4 h-full flex flex-col">
           <button
             onClick={addTask}
-            className="w-full bg-slate-700 dark:bg-gray-600 text-slate-100 px-4 py-2 rounded-lg hover:bg-slate-700 dark:hover:bg-gray-600 transition-colors"
+            className="w-full bg-slate-800 dark:bg-gray-700 text-slate-100 px-4 py-2 rounded-lg hover:bg-slate-700 dark:hover:bg-gray-600 transition-colors"
           >
             New Task
           </button>
@@ -39,18 +35,28 @@ export default function Sidebar({
             {tasks.map((task, index) => (
               <div
                 key={index}
-                className="flex justify-between items-center bg-white dark:bg-gray-800 p-3 rounded-lg shadow-sm hover:dark:bg-gray-700 transition-colors"
+                className={`flex justify-between items-center p-3 rounded-lg shadow-sm cursor-pointer transition-colors
+                  ${
+                    selectedDate === task.date
+                      ? "bg-slate-200 dark:bg-gray-700"
+                      : "bg-white dark:bg-gray-800 hover:bg-slate-50 dark:hover:bg-gray-700"
+                  }`}
+                onClick={() => onDateSelect(task.date)}
               >
-                <div className="flex-1">
-                  <p className="text-slate-800 dark:text-gray-200">
-                    {task.text}
-                  </p>
-                  <span className="text-slate-500 dark:text-gray-400 text-sm">
-                    {new Date(task.date).toLocaleDateString()}
-                  </span>
-                </div>
+                <span
+                  className={`${
+                    selectedDate === task.date
+                      ? "text-slate-700 dark:text-gray-200"
+                      : "text-slate-500 dark:text-gray-400"
+                  }`}
+                >
+                  {new Date(task.date).toLocaleDateString()}
+                </span>
                 <button
-                  onClick={() => deleteTask(index)}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    deleteTask(index);
+                  }}
                   className="text-slate-400 hover:text-slate-600 dark:text-gray-400 dark:hover:text-gray-200"
                 >
                   <svg

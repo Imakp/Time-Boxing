@@ -16,7 +16,7 @@ export default function MainContent({
     <div
       className={`pl-4 pt-16 overflow-hidden transition-margin duration-300
         ${isSidebarOpen ? "lg:ml-64" : "ml-0"}
-        ml-0  // Default margin for mobile
+        // ml-0
       `}
     >
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 h-full">
@@ -37,7 +37,7 @@ export default function MainContent({
 
         <div className="col-span-1 lg:col-span-2">
           <DayChart
-            tasks={tasks.filter((t) => t.startTime && t.endTime)}
+            tasks={tasks.filter((t) => t.isTimeBlock)}
             allTasks={tasks}
             addTask={addTask}
             deleteTask={deleteTask}
