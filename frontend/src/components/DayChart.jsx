@@ -44,7 +44,7 @@ export default function DayChart({
         ...newEntry.task,
         startTime: newEntry.startTime,
         endTime: newEntry.endTime,
-        isTimeBlock: true, 
+        isTimeBlock: true,
       });
 
       setShowPopup(false);
@@ -138,7 +138,7 @@ export default function DayChart({
                     }}
                   >
                     <span
-                      className={`text-xs text-blue-600 dark:text-blue-300 ${
+                      className={`text-xs text-blue-600 dark:text-blue-300 break-words whitespace-normal ${
                         task.completed
                           ? "line-through text-slate-400 dark:text-gray-500"
                           : ""
@@ -183,7 +183,7 @@ export default function DayChart({
                     }}
                   >
                     <span
-                      className={`text-xs text-blue-600 dark:text-blue-300 ${
+                      className={`text-xs text-blue-600 dark:text-blue-300 break-words whitespace-normal ${
                         task.completed
                           ? "line-through text-slate-400 dark:text-gray-500"
                           : ""

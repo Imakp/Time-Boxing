@@ -11,7 +11,8 @@ export default function AllTasks({ tasks, addTask, deleteTask, updateTask }) {
   };
 
   const handleKeyDown = (e) => {
-    if (e.key === "Enter") {
+    if (e.key === "Enter" && !e.shiftKey) {
+      e.preventDefault();
       handleAddTask();
     }
   };
@@ -42,16 +43,16 @@ export default function AllTasks({ tasks, addTask, deleteTask, updateTask }) {
       </div>
 
       <div className="flex-1 overflow-y-auto min-h-0 space-y-2 pr-2 scrollbar-hide">
-        {tasks.map((task, index) => (
+        {tasks.map((task) => (
           <div
             key={task.id}
-            className="flex gap-2 items-center bg-white dark:bg-gray-800 p-2 md:p-3 rounded-lg shadow-sm hover:shadow-md transition-shadow"
+            className="flex gap-2 items-start bg-white dark:bg-gray-800 p-2 md:p-3 rounded-lg shadow-sm hover:shadow-md transition-shadow"
           >
             <button
               onClick={() =>
                 updateTask(task.id, { completed: !task.completed })
               }
-              className="flex-shrink-0 text-slate-600 dark:text-gray-300 hover:text-slate-800 dark:hover:text-gray-100"
+              className="flex-shrink-0 text-slate-600 dark:text-gray-300 hover:text-slate-800 dark:hover:text-gray-100 mt-1"
             >
               {task.completed ? (
                 <svg
@@ -77,18 +78,29 @@ export default function AllTasks({ tasks, addTask, deleteTask, updateTask }) {
                 </svg>
               )}
             </button>
-            <input
-              value={task.text}
-              onChange={(e) => updateTask(task.id, { text: e.target.value })}
-              className={`flex-1 min-w-0 bg-transparent text-sm md:text-base ${
-                task.completed
-                  ? "line-through text-slate-400 dark:text-gray-500"
-                  : "text-slate-800 dark:text-gray-200"
-              } focus:outline-none`}
-            />
+            <div className="flex-1 min-w-0">
+              <textarea
+                value={task.text}
+                onChange={(e) => updateTask(task.id, { text: e.target.value })}
+                className={`w-full bg-transparent text-sm md:text-base resize-none ${
+                  task.completed
+                    ? "line-through text-slate-400 dark:text-gray-500"
+                    : "text-slate-800 dark:text-gray-200"
+                } focus:outline-none`}
+                style={{
+                  height: "auto",
+                  minHeight: "24px",
+                  overflow: "hidden",
+                }}
+                onInput={(e) => {
+                  e.target.style.height = "0px";
+                  e.target.style.height = e.target.scrollHeight + "px";
+                }}
+              />
+            </div>
             <button
               onClick={() => deleteTask(task.id)}
-              className="flex-shrink-0 text-slate-400 hover:text-slate-600 dark:text-gray-400 dark:hover:text-gray-200 p-1 rounded-full hover:bg-slate-100 dark:hover:bg-gray-700 transition-colors"
+              className="flex-shrink-0 text-slate-400 hover:text-slate-600 dark:text-gray-400 dark:hover:text-gray-200 p-1 rounded-full hover:bg-slate-100 dark:hover:bg-gray-700 transition-colors mt-1"
               aria-label="Delete task"
             >
               <svg
