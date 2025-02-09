@@ -10,6 +10,12 @@ export default function AllTasks({ tasks, addTask, deleteTask, updateTask }) {
     }
   };
 
+  const handleKeyDown = (e) => {
+    if (e.key === "Enter") {
+      handleAddTask();
+    }
+  };
+
   return (
     <div className="w-[calc(100%-1rem)] bg-slate-100 dark:bg-gray-900 p-4 md:p-6 rounded-xl shadow-sm border dark:border-gray-800 flex flex-col h-[408px]">
       <div className="flex items-center justify-between mb-4">
@@ -23,7 +29,7 @@ export default function AllTasks({ tasks, addTask, deleteTask, updateTask }) {
           type="text"
           value={newTask}
           onChange={(e) => setNewTask(e.target.value)}
-          onKeyPress={(e) => e.key === "Enter" && handleAddTask()}
+          onKeyDown={handleKeyDown}
           className="flex-1 w-full bg-white dark:bg-gray-800 rounded-lg px-3 py-2 text-sm md:text-base text-slate-800 dark:text-gray-200 border border-transparent focus:border-slate-300 dark:focus:border-gray-600"
           placeholder="Add new task"
         />
