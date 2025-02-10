@@ -92,6 +92,12 @@ export default function AllTasks({ tasks, addTask, deleteTask, updateTask }) {
                   minHeight: "24px",
                   overflow: "hidden",
                 }}
+                ref={(el) => {
+                  if (el) {
+                    el.style.height = "0px";
+                    el.style.height = el.scrollHeight + "px";
+                  }
+                }}
                 onInput={(e) => {
                   e.target.style.height = "0px";
                   e.target.style.height = e.target.scrollHeight + "px";

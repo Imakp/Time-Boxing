@@ -32,9 +32,9 @@ export default function Sidebar({
           </button>
 
           <div className="mt-4 space-y-2 flex-1 overflow-y-auto pb-4 scrollbar-hide">
-            {tasks.map((task, index) => (
+            {tasks.map((task) => (
               <div
-                key={index}
+                key={task.id}
                 className={`flex justify-between items-center p-3 rounded-lg shadow-sm cursor-pointer transition-colors
                   ${
                     selectedDate === task.date
@@ -55,7 +55,7 @@ export default function Sidebar({
                 <button
                   onClick={(e) => {
                     e.stopPropagation();
-                    deleteTask(index);
+                    deleteTask(task.id);
                   }}
                   className="text-slate-400 hover:text-slate-600 dark:text-gray-400 dark:hover:text-gray-200"
                 >

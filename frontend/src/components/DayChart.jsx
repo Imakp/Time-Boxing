@@ -72,6 +72,10 @@ export default function DayChart({
       setTimeError("End time must be after start time");
       return false;
     }
+    if ((end - start) < 15) { // 15 minutes minimum
+      setTimeError("Minimum time block is 15 minutes");
+      return false;
+    }
     setTimeError("");
     return true;
   };

@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import Navbar from "./components/Navbar";
 import Sidebar from "./components/Sidebar";
 import MainContent from "./components/MainContent";
+import { v4 as uuidv4 } from 'uuid';
 
 function App() {
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
@@ -32,7 +33,7 @@ function App() {
       return;
     }
 
-    const newTask = { id: Date.now(), date };
+    const newTask = { id: uuidv4(), date };
     setDailyTasks((prev) => [...prev, newTask]);
     setSelectedDate(date);
 
@@ -46,10 +47,12 @@ function App() {
     }));
   };
 
-  const deleteDailyTask = (index) => {
-    const taskToDelete = dailyTasks[index];
-    setDailyTasks(dailyTasks.filter((_, i) => i !== index));
+  const deleteDailyTask = (taskId) => {
+    const taskToDelete = dailyTasks.find((task) => task.id === taskId);
+    if (!taskToDelete) return;
 
+    setDailyTasks(dailyTasks.filter((task) => task.id !== taskId));
+    
     const updatedTasksByDate = { ...tasksByDate };
     delete updatedTasksByDate[taskToDelete.date];
     setTasksByDate(updatedTasksByDate);

@@ -43,7 +43,7 @@ export default function Navbar({
         </span>
         <button
           onClick={toggleDarkMode}
-          className="p-2 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg"
+          className="p-2 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-colors duration-300"
         >
           {isDarkMode ? (
             <svg
