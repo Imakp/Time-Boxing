@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { timeBlocksAPI } from "../api";
 
 const TimeColumn = ({ startHour, endHour }) => {
   const hours = Array.from(
@@ -36,34 +37,39 @@ export default function DayChart({
   const [showEditPopup, setShowEditPopup] = useState(false);
   const [timeError, setTimeError] = useState("");
 
-  const handleAddEntry = () => {
+  const handleAddEntry = async () => {
     if (newEntry.task && newEntry.startTime && newEntry.endTime) {
-      if (!validateTime(newEntry.startTime, newEntry.endTime)) return;
-
-      addTask({
-        ...newEntry.task,
-        startTime: newEntry.startTime,
-        endTime: newEntry.endTime,
-        isTimeBlock: true,
-      });
-
-      setShowPopup(false);
-      setNewEntry({
-        task: null,
-        startTime: "09:00",
-        endTime: "10:00",
-      });
+      try {
+        const response = await timeBlocksAPI.createTimeBlock({
+          ...newEntry.task,
+          startTime: newEntry.startTime,
+          endTime: newEntry.endTime
+        });
+        
+        addTask(response.data);
+        setShowPopup(false);
+        setNewEntry({
+          task: null,
+          startTime: "09:00",
+          endTime: "10:00",
+        });
+      } catch (err) {
+        console.error('Failed to create time block:', err);
+      }
     }
   };
 
-  const handleEditEntry = (updatedTask) => {
-    if (!validateTime(updatedTask.startTime, updatedTask.endTime)) return;
-
-    const taskIndex = tasks.findIndex((t) => t.id === updatedTask.id);
-    if (taskIndex > -1) {
-      updateTask(taskIndex, updatedTask);
+  const handleEditEntry = async (updatedTask) => {
+    try {
+      const response = await timeBlocksAPI.updateTimeBlock(
+        updatedTask._id, 
+        updatedTask
+      );
+      updateTask(response.data);
       setShowEditPopup(false);
       setSelectedTask(null);
+    } catch (err) {
+      console.error('Failed to update time block:', err);
     }
   };
 
