@@ -2,200 +2,170 @@ import { useState, useEffect } from "react";
 import Navbar from "./components/Navbar";
 import Sidebar from "./components/Sidebar";
 import MainContent from "./components/MainContent";
-import { v4 as uuidv4 } from 'uuid';
-import { tasksAPI, timeBlocksAPI, importantTasksAPI, dailyTasksAPI } from './api';
+import { v4 as uuidv4 } from "uuid";
+import {
+  getDailyTasks,
+  createDailyTask,
+  deleteDailyTask as deleteDailyTaskAPI,
+} from "./services/dailyTaskService";
+import {
+  getTasks,
+  createTask,
+  updateTask,
+  deleteTask,
+} from "./services/taskService";
+import {
+  addImportantTask as addImportantTaskAPI,
+  removeImportantTask as removeImportantTaskAPI,
+} from "./services/importantTaskService";
+import {
+  addDayChartTask as addDayChartTaskAPI,
+  removeDayChartTask as removeDayChartTaskAPI,
+} from "./services/dayChartService";
 
 function App() {
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   const [isDarkMode, setIsDarkMode] = useState(false);
   const [dailyTasks, setDailyTasks] = useState([]);
-  const [tasksByDate, setTasksByDate] = useState({});
+  const [tasks, setTasks] = useState([]);
   const [selectedDate, setSelectedDate] = useState(null);
+  const [importantTasks, setImportantTasks] = useState([]);
 
+  // Load daily tasks and all tasks
   useEffect(() => {
-    const handleResize = () => {
-      if (window.innerWidth < 1024) {
-        setIsSidebarOpen(false);
-      } else {
-        setIsSidebarOpen(true);
+    const loadInitialData = async () => {
+      const fetchedDailyTasks = await getDailyTasks();
+      setDailyTasks(fetchedDailyTasks);
+
+      const fetchedTasks = await getTasks();
+      setTasks(fetchedTasks);
+
+      // Set initial selected date to today if it exists in daily tasks
+      const today = new Date().toISOString().split("T")[0];
+      const todayTask = fetchedDailyTasks.find((task) => task.date === today);
+      if (todayTask) {
+        setSelectedDate(today);
       }
     };
-
-    handleResize();
-    window.addEventListener("resize", handleResize);
-    return () => window.removeEventListener("resize", handleResize);
+    loadInitialData();
   }, []);
 
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const [tasksRes, importantRes, timeBlocksRes] = await Promise.all([
-          tasksAPI.getTasks(selectedDate),
-          importantTasksAPI.getImportantTasks(),
-          timeBlocksAPI.getTimeBlocks()
-        ]);
-        
-        setTasksByDate(prev => ({
-          ...prev,
-          [selectedDate]: {
-            allTasks: tasksRes.data,
-            importantTasks: importantRes.data,
-            dayChartTasks: timeBlocksRes.data
-          }
-        }));
-      } catch (err) {
-        console.error('Failed to fetch data:', err);
-      }
-    };
-    
-    if (selectedDate) fetchData();
-  }, [selectedDate]);
-
-  const addDailyTask = () => {
+  const addDailyTask = async () => {
     const date = new Date().toISOString().split("T")[0];
-
     if (dailyTasks.some((task) => task.date === date)) {
       alert("Task for today already exists!");
       return;
     }
 
-    const newTask = { id: uuidv4(), date };
-    setDailyTasks((prev) => [...prev, newTask]);
-    setSelectedDate(date);
-
-    setTasksByDate((prev) => ({
-      ...prev,
-      [date]: prev[date] || {
-        allTasks: [],
-        importantTasks: [],
-        dayChartTasks: [],
-      },
-    }));
-  };
-
-  const deleteDailyTask = (taskId) => {
-    const taskToDelete = dailyTasks.find((task) => task.id === taskId);
-    if (!taskToDelete) return;
-
-    setDailyTasks(dailyTasks.filter((task) => task.id !== taskId));
-    
-    const updatedTasksByDate = { ...tasksByDate };
-    delete updatedTasksByDate[taskToDelete.date];
-    setTasksByDate(updatedTasksByDate);
-
-    if (selectedDate === taskToDelete.date) {
-      setSelectedDate(null);
+    try {
+      const newTask = await createDailyTask(date);
+      setDailyTasks((prev) => [...prev, newTask]);
+      setSelectedDate(date);
+    } catch (error) {
+      alert("Failed to create daily task");
     }
   };
 
-  const addAllTask = async (task) => {
-    try {
-      if (!selectedDate) {
-        alert("Please create a daily task first!");
-        return;
+  const deleteDailyTask = async (taskId) => {
+    const taskToDelete = dailyTasks.find((task) => task._id === taskId);
+    if (!taskToDelete) return;
+
+    const success = await deleteDailyTaskAPI(taskId);
+    if (success) {
+      // Remove the daily task
+      setDailyTasks(dailyTasks.filter((task) => task._id !== taskId));
+
+      // Remove all tasks associated with this date
+      const taskDate = new Date(taskToDelete.date).toISOString().split("T")[0];
+      setTasks((prevTasks) =>
+        prevTasks.filter((task) => {
+          const currentTaskDate = new Date(task.date)
+            .toISOString()
+            .split("T")[0];
+          return currentTaskDate !== taskDate;
+        })
+      );
+
+      // Reset selected date if it was the deleted date
+      if (selectedDate === taskDate) {
+        setSelectedDate(null);
       }
-      
-      const taskWithDate = { ...task, date: selectedDate };
-      let response;
-      
-      if (task.isTimeBlock) {
-        response = await timeBlocksAPI.createTimeBlock(taskWithDate);
-      } else {
-        response = await tasksAPI.createTask(taskWithDate);
-      }
-      
-      setTasksByDate(prev => ({
-        ...prev,
-        [selectedDate]: {
-          ...prev[selectedDate],
-          allTasks: [...(prev[selectedDate]?.allTasks || []), response.data]
-        }
-      }));
-    } catch (err) {
-      console.error('Failed to create task:', err);
+    }
+  };
+
+  const addAllTask = async (taskData) => {
+    if (!selectedDate) {
+      alert("Please select a date first");
+      return;
+    }
+
+    const newTask = await createTask({
+      ...taskData,
+      date: selectedDate,
+    });
+
+    if (newTask) {
+      setTasks((prev) => [...prev, newTask]);
     }
   };
 
   const deleteAllTask = async (taskId) => {
-    try {
-      await tasksAPI.deleteTask(taskId);
-      setTasksByDate(prev => ({
-        ...prev,
-        [selectedDate]: {
-          ...prev[selectedDate],
-          allTasks: prev[selectedDate].allTasks.filter(t => t._id !== taskId)
-        }
-      }));
-    } catch (err) {
-      console.error('Failed to delete task:', err);
+    const success = await deleteTask(taskId);
+    if (success) {
+      setTasks((prev) => prev.filter((t) => t._id !== taskId));
     }
   };
 
   const updateAllTask = async (taskId, updates) => {
-    try {
-      const response = await tasksAPI.updateTask(taskId, updates);
-      setTasksByDate(prev => ({
-        ...prev,
-        [selectedDate]: {
-          ...prev[selectedDate],
-          allTasks: prev[selectedDate].allTasks.map(t => 
-            t._id === taskId ? response.data : t
-          )
-        }
-      }));
-    } catch (err) {
-      console.error('Failed to update task:', err);
+    const updatedTask = await updateTask(taskId, updates);
+    if (updatedTask) {
+      setTasks((prev) => prev.map((t) => (t._id === taskId ? updatedTask : t)));
     }
-  };
-
-  const addImportantTask = (taskId) => {
-    if (!selectedDate) return;
-
-    setTasksByDate((prev) => {
-      const dateTasks = prev[selectedDate] || {
-        allTasks: [],
-        importantTasks: [],
-        dayChartTasks: [],
-      };
-
-      const taskToAdd = dateTasks.allTasks.find((t) => t.id === taskId);
-      const isAlreadyImportant = dateTasks.importantTasks.some(
-        (t) => t.id === taskId
-      );
-
-      if (
-        dateTasks.importantTasks.length < 3 &&
-        taskToAdd &&
-        !isAlreadyImportant
-      ) {
-        return {
-          ...prev,
-          [selectedDate]: {
-            ...dateTasks,
-            importantTasks: [...dateTasks.importantTasks, taskToAdd],
-          },
-        };
-      }
-      return prev;
-    });
-  };
-
-  const deleteImportantTask = (taskId) => {
-    if (!selectedDate) return;
-
-    setTasksByDate((prev) => ({
-      ...prev,
-      [selectedDate]: {
-        ...prev[selectedDate],
-        importantTasks: prev[selectedDate].importantTasks.filter(
-          (t) => t.id !== taskId
-        ),
-      },
-    }));
   };
 
   const handleDateSelect = (date) => {
     setSelectedDate(date);
+  };
+
+  // Filter tasks for the selected date
+  const currentDateTasks = selectedDate
+    ? tasks.filter((task) => {
+        if (!task.date) return false;
+        const taskDate = new Date(task.date).toISOString().split("T")[0];
+        return taskDate === selectedDate;
+      })
+    : [];
+
+  // Filter important tasks for the selected date
+  const currentImportantTasks = selectedDate
+    ? currentDateTasks.filter((task) => task.important)
+    : [];
+
+  const handleAddImportantTask = async (taskId) => {
+    if (!selectedDate) {
+      alert("Please select a date first");
+      return;
+    }
+
+    try {
+      const updatedTask = await addImportantTaskAPI(taskId, selectedDate);
+      setTasks((prev) => prev.map((t) => (t._id === taskId ? updatedTask : t)));
+    } catch (error) {
+      alert(error.message);
+    }
+  };
+
+  const handleDeleteImportantTask = async (taskId) => {
+    try {
+      const updatedTask = await removeImportantTaskAPI(taskId, selectedDate);
+      if (updatedTask) {
+        setTasks((prev) =>
+          prev.map((t) => (t._id === taskId ? updatedTask : t))
+        );
+      }
+    } catch (error) {
+      alert("Failed to remove important task");
+    }
   };
 
   const toggleDarkMode = () => {
@@ -203,17 +173,53 @@ function App() {
     document.documentElement.classList.toggle("dark");
   };
 
-  const currentTasks = selectedDate
-    ? tasksByDate[selectedDate] || {
-        allTasks: [],
-        importantTasks: [],
-        dayChartTasks: [],
+  const handleAddDayChartTask = async (taskId, startTime, endTime) => {
+    if (!selectedDate) {
+      alert("Please select a date first");
+      return;
+    }
+
+    // Find the existing task
+    const existingTask = tasks.find((t) => t._id === taskId);
+    if (!existingTask) {
+      alert("Task not found");
+      return;
+    }
+
+    if (existingTask.isTimeBlock) {
+      alert("Task is already in day chart");
+      return;
+    }
+
+    try {
+      const updatedTask = await addDayChartTaskAPI(
+        taskId,
+        selectedDate,
+        startTime,
+        endTime
+      );
+      if (updatedTask) {
+        setTasks((prev) =>
+          prev.map((t) => (t._id === taskId ? { ...t, ...updatedTask } : t))
+        );
       }
-    : {
-        allTasks: [],
-        importantTasks: [],
-        dayChartTasks: [],
-      };
+    } catch (error) {
+      alert(error.message);
+    }
+  };
+
+  const handleRemoveDayChartTask = async (taskId) => {
+    try {
+      const updatedTask = await removeDayChartTaskAPI(taskId, selectedDate);
+      if (updatedTask) {
+        setTasks((prev) =>
+          prev.map((t) => (t._id === taskId ? updatedTask : t))
+        );
+      }
+    } catch (error) {
+      alert("Failed to remove day chart task");
+    }
+  };
 
   return (
     <div
@@ -238,13 +244,16 @@ function App() {
       />
       <MainContent
         isSidebarOpen={isSidebarOpen}
-        tasks={currentTasks.allTasks}
+        tasks={currentDateTasks}
         addTask={addAllTask}
         deleteTask={deleteAllTask}
         updateTask={updateAllTask}
-        importantTasks={currentTasks.importantTasks}
-        addImportantTask={addImportantTask}
-        deleteImportantTask={deleteImportantTask}
+        selectedDate={selectedDate}
+        importantTasks={currentImportantTasks}
+        addImportantTask={handleAddImportantTask}
+        deleteImportantTask={handleDeleteImportantTask}
+        addDayChartTask={handleAddDayChartTask}
+        removeDayChartTask={handleRemoveDayChartTask}
       />
     </div>
   );

@@ -1,12 +1,14 @@
-const express = require('express');
-const router = express.Router();
-const { 
+import express from "express";
+import {
   getImportantTasks,
-  markAsImportant,
-  removeFromImportant
-} = require('../controllers/importantTasks');
+  addImportantTask,
+  removeImportantTask,
+} from "../controllers/importantTaskController.js";
 
-router.route('/').get(getImportantTasks);
-router.route('/:id').post(markAsImportant).delete(removeFromImportant);
+const router = express.Router();
 
-module.exports = router; 
+router.get("/", getImportantTasks);
+router.post("/add", addImportantTask);
+router.post("/remove", removeImportantTask);
+
+export default router;

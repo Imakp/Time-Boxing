@@ -1,5 +1,4 @@
 import { useState } from "react";
-import { timeBlocksAPI } from "../api";
 
 const TimeColumn = ({ startHour, endHour }) => {
   const hours = Array.from(
@@ -37,39 +36,32 @@ export default function DayChart({
   const [showEditPopup, setShowEditPopup] = useState(false);
   const [timeError, setTimeError] = useState("");
 
-  const handleAddEntry = async () => {
+  const handleAddEntry = () => {
     if (newEntry.task && newEntry.startTime && newEntry.endTime) {
-      try {
-        const response = await timeBlocksAPI.createTimeBlock({
-          ...newEntry.task,
-          startTime: newEntry.startTime,
-          endTime: newEntry.endTime
-        });
-        
-        addTask(response.data);
-        setShowPopup(false);
-        setNewEntry({
-          task: null,
-          startTime: "09:00",
-          endTime: "10:00",
-        });
-      } catch (err) {
-        console.error('Failed to create time block:', err);
-      }
+      if (!validateTime(newEntry.startTime, newEntry.endTime)) return;
+
+      addTask(newEntry.task._id, newEntry.startTime, newEntry.endTime);
+
+      setShowPopup(false);
+      setNewEntry({
+        task: null,
+        startTime: "09:00",
+        endTime: "10:00",
+      });
     }
   };
 
-  const handleEditEntry = async (updatedTask) => {
-    try {
-      const response = await timeBlocksAPI.updateTimeBlock(
-        updatedTask._id, 
-        updatedTask
-      );
-      updateTask(response.data);
+  const handleEditEntry = (updatedTask) => {
+    if (!validateTime(updatedTask.startTime, updatedTask.endTime)) return;
+
+    const taskToUpdate = tasks.find((t) => t._id === updatedTask._id);
+    if (taskToUpdate) {
+      updateTask(updatedTask._id, {
+        startTime: updatedTask.startTime,
+        endTime: updatedTask.endTime,
+      });
       setShowEditPopup(false);
       setSelectedTask(null);
-    } catch (err) {
-      console.error('Failed to update time block:', err);
     }
   };
 
@@ -78,7 +70,8 @@ export default function DayChart({
       setTimeError("End time must be after start time");
       return false;
     }
-    if ((end - start) < 15) { // 15 minutes minimum
+    if (end - start < 15) {
+      // 15 minutes minimum
       setTimeError("Minimum time block is 15 minutes");
       return false;
     }
@@ -88,8 +81,8 @@ export default function DayChart({
 
   const availableTasks = allTasks.filter(
     (task) =>
-      !tasks.some((t) => t.id === task.id) ||
-      (selectedTask && task.id === selectedTask.id)
+      !tasks.some((t) => t._id === task._id) ||
+      (selectedTask && task._id === selectedTask._id)
   );
 
   return (
@@ -244,24 +237,22 @@ export default function DayChart({
                 <select
                   className="w-full bg-white dark:bg-gray-800 rounded-lg px-4 py-2 text-slate-800 dark:text-gray-200"
                   onChange={(e) => {
-                    try {
-                      setNewEntry({
-                        ...newEntry,
-                        task: JSON.parse(e.target.value),
-                      });
-                    } catch (error) {
-                      console.error("Invalid JSON input");
-                    }
+                    const selectedTask = allTasks.find(
+                      (t) => t._id === e.target.value
+                    );
+                    setNewEntry({
+                      ...newEntry,
+                      task: selectedTask,
+                    });
                   }}
+                  value={newEntry.task?._id || ""}
                 >
                   <option value="">Select Task</option>
-                  {allTasks
-                    .filter((task) => !tasks.some((t) => t.id === task.id))
-                    .map((task) => (
-                      <option key={task.id} value={JSON.stringify(task)}>
-                        {task.text}
-                      </option>
-                    ))}
+                  {allTasks.map((task) => (
+                    <option key={task._id} value={task._id}>
+                      {task.text}
+                    </option>
+                  ))}
                 </select>
               </div>
 

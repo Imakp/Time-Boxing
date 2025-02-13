@@ -1,12 +1,14 @@
-const express = require('express');
-const router = express.Router();
-const { 
+import express from "express";
+import {
   getDailyTasks,
   createDailyTask,
-  deleteDailyTask
-} = require('../controllers/dailyTasks');
+  deleteDailyTask,
+} from "../controllers/dailyTaskController.js";
 
-router.route('/').get(getDailyTasks).post(createDailyTask);
-router.route('/:id').delete(deleteDailyTask);
+const router = express.Router();
 
-module.exports = router; 
+router.get("/", getDailyTasks);
+router.post("/", createDailyTask);
+router.delete("/:id", deleteDailyTask);
+
+export default router;
