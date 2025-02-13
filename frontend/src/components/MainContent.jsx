@@ -11,6 +11,7 @@ export default function MainContent({
   importantTasks,
   addImportantTask,
   deleteImportantTask,
+  selectedDate,
 }) {
   return (
     <div
@@ -32,6 +33,7 @@ export default function MainContent({
             addTask={addTask}
             deleteTask={deleteTask}
             updateTask={updateTask}
+            selectedDate={selectedDate}
           />
         </div>
 

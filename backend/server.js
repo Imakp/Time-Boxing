@@ -3,6 +3,7 @@ import cors from 'cors';
 import connectDB from './config/db.js';
 import indexRouter from './routes/index.js';
 import dailyTasksRouter from './routes/dailyTasks.js';
+import tasksRouter from './routes/tasks.js';
 import dotenv from 'dotenv';
 
 dotenv.config();
@@ -18,6 +19,7 @@ app.use(cors({
 }));
 
 app.use('/api/daily-tasks', dailyTasksRouter);
+app.use('/api/tasks', tasksRouter);
 app.use('/api', indexRouter);
 
 // Error handling

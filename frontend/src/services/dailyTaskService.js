@@ -19,7 +19,8 @@ export const createDailyTask = async (date) => {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ date })
     });
-    return await response.json();
+    const result = await response.json();
+    return result ? { ...result, _id: result._id } : null;
   } catch (error) {
     console.error('Error creating daily task:', error);
     return null;

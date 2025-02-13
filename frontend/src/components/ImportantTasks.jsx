@@ -1,14 +1,14 @@
 import { useState } from "react";
 
 export default function ImportantTasks({
-  tasks,
+  tasks = [],
   addTask,
   deleteTask,
-  allTasks,
+  allTasks = []
 }) {
   const [showPopup, setShowPopup] = useState(false);
   const availableTasks = allTasks.filter(
-    (task) => !tasks.some((t) => t.id === task.id)
+    (task) => !tasks.some((t) => t._id === task._id)
   );
 
   const canAddMore = tasks.length < 3;
@@ -42,9 +42,9 @@ export default function ImportantTasks({
       </div>
 
       <div className="space-y-2">
-        {tasks.map((task, index) => (
+        {tasks.map((task) => (
           <div
-            key={task.id}
+            key={task._id}
             className="flex justify-between items-center bg-white dark:bg-gray-800 p-3 rounded-lg shadow-sm"
           >
             <span
@@ -57,7 +57,7 @@ export default function ImportantTasks({
               {task.text}
             </span>
             <button
-              onClick={() => deleteTask(task.id)}
+              onClick={() => deleteTask(task._id)}
               className="text-slate-400 hover:text-slate-600 dark:text-gray-400 dark:hover:text-gray-200 p-1 rounded-full hover:bg-slate-100 dark:hover:bg-gray-700 transition-colors"
             >
               <svg
@@ -108,7 +108,7 @@ export default function ImportantTasks({
               {availableTasks.length > 0 ? (
                 availableTasks.map((task) => (
                   <div
-                    key={task.id}
+                    key={task._id}
                     className="flex justify-between items-center p-2 hover:bg-slate-50 dark:hover:bg-gray-800 rounded transition-colors"
                   >
                     <span
@@ -122,7 +122,7 @@ export default function ImportantTasks({
                     </span>
                     <button
                       onClick={() => {
-                        addTask(task.id);
+                        addTask(task._id);
                         setShowPopup(false);
                       }}
                       className="bg-slate-800 dark:bg-gray-700 text-slate-100 dark:text-gray-200 px-3 py-1 rounded-lg hover:bg-slate-700 dark:hover:bg-gray-600 transition-colors"

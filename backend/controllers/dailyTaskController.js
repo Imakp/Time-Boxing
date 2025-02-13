@@ -22,7 +22,10 @@ export const createDailyTask = async (req, res) => {
       tasks: []
     });
     const savedTask = await newDailyTask.save();
-    res.status(201).json(savedTask);
+    const responseTask = savedTask.toObject();
+    responseTask._id = responseTask._id.toString();
+    responseTask.date = new Date(responseTask.date).toISOString().split('T')[0];
+    res.status(201).json(responseTask);
   } catch (error) {
     res.status(400).json({ message: error.message });
   }

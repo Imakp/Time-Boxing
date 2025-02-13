@@ -3,11 +3,17 @@ import { useState } from "react";
 export default function AllTasks({ tasks, addTask, deleteTask, updateTask }) {
   const [newTask, setNewTask] = useState("");
 
-  const handleAddTask = () => {
-    if (newTask.trim()) {
-      addTask({ id: Date.now(), text: newTask, completed: false });
-      setNewTask("");
-    }
+  const handleAddTask = async () => {
+    if (!newTask.trim()) return;
+    
+    const taskData = {
+      text: newTask,
+      completed: false,
+      date: new Date().toISOString().split('T')[0]
+    };
+    
+    await addTask(taskData);
+    setNewTask("");
   };
 
   const handleKeyDown = (e) => {
@@ -45,12 +51,12 @@ export default function AllTasks({ tasks, addTask, deleteTask, updateTask }) {
       <div className="flex-1 overflow-y-auto min-h-0 space-y-2 pr-2 scrollbar-hide">
         {tasks.map((task) => (
           <div
-            key={task.id}
+            key={task._id}
             className="flex gap-2 items-start bg-white dark:bg-gray-800 p-2 md:p-3 rounded-lg shadow-sm hover:shadow-md transition-shadow"
           >
             <button
               onClick={() =>
-                updateTask(task.id, { completed: !task.completed })
+                updateTask(task._id, { completed: !task.completed })
               }
               className="flex-shrink-0 text-slate-600 dark:text-gray-300 hover:text-slate-800 dark:hover:text-gray-100 mt-1"
             >
@@ -81,7 +87,7 @@ export default function AllTasks({ tasks, addTask, deleteTask, updateTask }) {
             <div className="flex-1 min-w-0">
               <textarea
                 value={task.text}
-                onChange={(e) => updateTask(task.id, { text: e.target.value })}
+                onChange={(e) => updateTask(task._id, { text: e.target.value })}
                 className={`w-full bg-transparent text-sm md:text-base resize-none ${
                   task.completed
                     ? "line-through text-slate-400 dark:text-gray-500"
@@ -105,7 +111,7 @@ export default function AllTasks({ tasks, addTask, deleteTask, updateTask }) {
               />
             </div>
             <button
-              onClick={() => deleteTask(task.id)}
+              onClick={() => deleteTask(task._id)}
               className="flex-shrink-0 text-slate-400 hover:text-slate-600 dark:text-gray-400 dark:hover:text-gray-200 p-1 rounded-full hover:bg-slate-100 dark:hover:bg-gray-700 transition-colors mt-1"
               aria-label="Delete task"
             >
