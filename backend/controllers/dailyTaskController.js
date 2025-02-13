@@ -1,4 +1,5 @@
 import DailyTask from '../models/DailyTask.js';
+import Task from '../models/Task.js';
 
 export const getDailyTasks = async (req, res) => {
   try {
@@ -33,9 +34,18 @@ export const createDailyTask = async (req, res) => {
 
 export const deleteDailyTask = async (req, res) => {
   try {
-    const deletedTask = await DailyTask.findByIdAndDelete(req.params.id);
-    if (!deletedTask) return res.status(404).json({ message: 'Task not found' });
-    res.json({ message: 'Daily task deleted' });
+    const dailyTask = await DailyTask.findById(req.params.id);
+    if (!dailyTask) {
+      return res.status(404).json({ message: 'Task not found' });
+    }
+
+    // Delete all associated tasks
+    await Task.deleteMany({ date: dailyTask.date });
+
+    // Delete the daily task
+    await DailyTask.findByIdAndDelete(req.params.id);
+    
+    res.json({ message: 'Daily task and associated tasks deleted' });
   } catch (error) {
     res.status(500).json({ message: error.message });
   }

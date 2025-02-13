@@ -52,10 +52,23 @@ function App() {
   };
 
   const deleteDailyTask = async (taskId) => {
+    const taskToDelete = dailyTasks.find(task => task._id === taskId);
+    if (!taskToDelete) return;
+
     const success = await deleteDailyTaskAPI(taskId);
     if (success) {
+      // Remove the daily task
       setDailyTasks(dailyTasks.filter((task) => task._id !== taskId));
-      if (selectedDate === taskToDelete.date) {
+      
+      // Remove all tasks associated with this date
+      const taskDate = new Date(taskToDelete.date).toISOString().split('T')[0];
+      setTasks(prevTasks => prevTasks.filter(task => {
+        const currentTaskDate = new Date(task.date).toISOString().split('T')[0];
+        return currentTaskDate !== taskDate;
+      }));
+
+      // Reset selected date if it was the deleted date
+      if (selectedDate === taskDate) {
         setSelectedDate(null);
       }
     }
