@@ -79,11 +79,13 @@ export default function DayChart({
     return true;
   };
 
-  const availableTasks = allTasks.filter(
-    (task) =>
-      !tasks.some((t) => t._id === task._id) ||
-      (selectedTask && task._id === selectedTask._id)
-  );
+  const availableTasks = [
+    ...(selectedTask ? [selectedTask] : []),
+    ...allTasks.filter(task => 
+      !tasks.some(t => t._id === task._id) || 
+      task._id === selectedTask?._id
+    )
+  ];
 
   return (
     <div className="my-8 bg-slate-100 dark:bg-gray-900 p-6 rounded-xl shadow-sm border dark:border-gray-800 mr-4">
@@ -333,16 +335,15 @@ export default function DayChart({
                   className="w-full bg-white dark:bg-gray-800 rounded-lg px-4 py-2 text-slate-800 dark:text-gray-200"
                   value={selectedTask?._id || ""}
                   onChange={(e) => {
-                    const task = allTasks.find((t) => t._id === e.target.value);
-                    setSelectedTask(
-                      task
-                        ? {
-                            ...task,
-                            startTime: selectedTask?.startTime || "09:00",
-                            endTime: selectedTask?.endTime || "10:00",
-                          }
-                        : null
-                    );
+                    const task = tasks.find((t) => t._id === e.target.value) || 
+                                allTasks.find((t) => t._id === e.target.value);
+                    if (task) {
+                      setSelectedTask({
+                        ...task,
+                        startTime: selectedTask?.startTime,
+                        endTime: selectedTask?.endTime
+                      });
+                    }
                   }}
                 >
                   <option value="">Select Task</option>
