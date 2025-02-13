@@ -62,9 +62,15 @@ export const deleteTask = async (req, res) => {
     // Find the daily task and remove the task ID from all arrays
     const dailyTask = await DailyTask.findOne({ date: task.date });
     if (dailyTask) {
-      dailyTask.tasks = dailyTask.tasks.filter(id => id.toString() !== req.params.id);
-      dailyTask.importantTasks = dailyTask.importantTasks.filter(id => id.toString() !== req.params.id);
-      dailyTask.dayChartTasks = dailyTask.dayChartTasks.filter(id => id.toString() !== req.params.id);
+      dailyTask.tasks = dailyTask.tasks.filter(
+        (id) => id.toString() !== req.params.id
+      );
+      dailyTask.importantTasks = dailyTask.importantTasks.filter(
+        (id) => id.toString() !== req.params.id
+      );
+      dailyTask.dayChartTasks = dailyTask.dayChartTasks.filter(
+        (id) => id.toString() !== req.params.id
+      );
       await dailyTask.save();
     }
 

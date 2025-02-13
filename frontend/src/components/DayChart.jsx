@@ -331,11 +331,9 @@ export default function DayChart({
                 </label>
                 <select
                   className="w-full bg-white dark:bg-gray-800 rounded-lg px-4 py-2 text-slate-800 dark:text-gray-200"
-                  value={selectedTask?.id || ""}
+                  value={selectedTask?._id || ""}
                   onChange={(e) => {
-                    const task = allTasks.find(
-                      (t) => t.id === parseInt(e.target.value)
-                    );
+                    const task = allTasks.find((t) => t._id === e.target.value);
                     setSelectedTask(
                       task
                         ? {
@@ -349,7 +347,7 @@ export default function DayChart({
                 >
                   <option value="">Select Task</option>
                   {availableTasks.map((task) => (
-                    <option key={task.id} value={task.id}>
+                    <option key={task._id} value={task._id}>
                       {task.text}
                     </option>
                   ))}
