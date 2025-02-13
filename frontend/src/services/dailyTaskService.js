@@ -1,4 +1,4 @@
-const API_URL = "http://localhost:3000/api/daily-tasks";
+const API_URL = "/api/daily-tasks";
 
 export const getDailyTasks = async () => {
   try {

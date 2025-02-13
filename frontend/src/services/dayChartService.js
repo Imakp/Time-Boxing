@@ -1,4 +1,4 @@
-const API_URL = "http://localhost:3000/api/day-chart";
+const API_URL = "/api/day-chart";
 
 export const getDayChartTasks = async (date) => {
   try {
