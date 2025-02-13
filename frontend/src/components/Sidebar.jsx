@@ -34,7 +34,7 @@ export default function Sidebar({
           <div className="mt-4 space-y-2 flex-1 overflow-y-auto pb-4 scrollbar-hide">
             {tasks.map((task) => (
               <div
-                key={task.id}
+                key={task._id}
                 className={`flex justify-between items-center p-3 rounded-lg shadow-sm cursor-pointer transition-colors
                   ${
                     selectedDate === task.date
@@ -50,12 +50,12 @@ export default function Sidebar({
                       : "text-slate-500 dark:text-gray-400"
                   }`}
                 >
-                  {new Date(task.date).toLocaleDateString()}
+                  {new Date(task.date).toLocaleDateString(undefined, {year: 'numeric', month: 'short', day: 'numeric'})}
                 </span>
                 <button
                   onClick={(e) => {
                     e.stopPropagation();
-                    deleteTask(task.id);
+                    deleteTask(task._id);
                   }}
                   className="text-slate-400 hover:text-slate-600 dark:text-gray-400 dark:hover:text-gray-200"
                 >

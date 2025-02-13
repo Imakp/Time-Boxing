@@ -3,6 +3,7 @@ import Navbar from "./components/Navbar";
 import Sidebar from "./components/Sidebar";
 import MainContent from "./components/MainContent";
 import { v4 as uuidv4 } from 'uuid';
+import { getDailyTasks, createDailyTask, deleteDailyTask as deleteDailyTaskAPI } from './services/dailyTaskService';
 
 function App() {
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
@@ -25,40 +26,38 @@ function App() {
     return () => window.removeEventListener("resize", handleResize);
   }, []);
 
-  const addDailyTask = () => {
-    const date = new Date().toISOString().split("T")[0];
+  useEffect(() => {
+    const loadDailyTasks = async () => {
+      const tasks = await getDailyTasks();
+      setDailyTasks(tasks);
+    };
+    loadDailyTasks();
+  }, []);
 
+  const addDailyTask = async () => {
+    const date = new Date().toISOString().split("T")[0];
+    
     if (dailyTasks.some((task) => task.date === date)) {
       alert("Task for today already exists!");
       return;
     }
 
-    const newTask = { id: uuidv4(), date };
-    setDailyTasks((prev) => [...prev, newTask]);
-    setSelectedDate(date);
-
-    setTasksByDate((prev) => ({
-      ...prev,
-      [date]: prev[date] || {
-        allTasks: [],
-        importantTasks: [],
-        dayChartTasks: [],
-      },
-    }));
+    try {
+      const newTask = await createDailyTask(date);
+      setDailyTasks((prev) => [...prev, newTask]);
+      setSelectedDate(date);
+    } catch (error) {
+      alert("Failed to create daily task");
+    }
   };
 
-  const deleteDailyTask = (taskId) => {
-    const taskToDelete = dailyTasks.find((task) => task.id === taskId);
-    if (!taskToDelete) return;
-
-    setDailyTasks(dailyTasks.filter((task) => task.id !== taskId));
-    
-    const updatedTasksByDate = { ...tasksByDate };
-    delete updatedTasksByDate[taskToDelete.date];
-    setTasksByDate(updatedTasksByDate);
-
-    if (selectedDate === taskToDelete.date) {
-      setSelectedDate(null);
+  const deleteDailyTask = async (taskId) => {
+    const success = await deleteDailyTaskAPI(taskId);
+    if (success) {
+      setDailyTasks(dailyTasks.filter((task) => task._id !== taskId));
+      if (selectedDate === taskToDelete.date) {
+        setSelectedDate(null);
+      }
     }
   };
 
