@@ -5,6 +5,7 @@ import MainContent from "./components/MainContent";
 import { v4 as uuidv4 } from 'uuid';
 import { getDailyTasks, createDailyTask, deleteDailyTask as deleteDailyTaskAPI } from './services/dailyTaskService';
 import { getTasks, createTask, updateTask, deleteTask } from './services/taskService';
+import { addImportantTask as addImportantTaskAPI, removeImportantTask as removeImportantTaskAPI } from './services/importantTaskService';
 
 function App() {
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
@@ -104,29 +105,32 @@ function App() {
   // Filter important tasks for the selected date
   const currentImportantTasks = currentDateTasks.filter(task => task.important);
 
-  const addImportantTask = async (taskId) => {
+  const handleAddImportantTask = async (taskId) => {
     if (!selectedDate) {
       alert("Please select a date first");
       return;
     }
 
-    const taskToUpdate = tasks.find(t => t._id === taskId);
-    if (!taskToUpdate) return;
-
-    const updatedTask = await updateTask(taskId, { important: true });
-    if (updatedTask) {
+    try {
+      const updatedTask = await addImportantTaskAPI(taskId, selectedDate);
       setTasks(prev => prev.map(t => 
-        t._id === taskId ? { ...t, important: true } : t
+        t._id === taskId ? updatedTask : t
       ));
+    } catch (error) {
+      alert(error.message);
     }
   };
 
-  const deleteImportantTask = async (taskId) => {
-    const updatedTask = await updateTask(taskId, { important: false });
-    if (updatedTask) {
-      setTasks(prev => prev.map(t => 
-        t._id === taskId ? { ...t, important: false } : t
-      ));
+  const handleDeleteImportantTask = async (taskId) => {
+    try {
+      const updatedTask = await removeImportantTaskAPI(taskId, selectedDate);
+      if (updatedTask) {
+        setTasks(prev => prev.map(t => 
+          t._id === taskId ? updatedTask : t
+        ));
+      }
+    } catch (error) {
+      alert('Failed to remove important task');
     }
   };
 
@@ -160,8 +164,8 @@ function App() {
         updateTask={updateAllTask}
         selectedDate={selectedDate}
         importantTasks={currentImportantTasks}
-        addImportantTask={addImportantTask}
-        deleteImportantTask={deleteImportantTask}
+        addImportantTask={handleAddImportantTask}
+        deleteImportantTask={handleDeleteImportantTask}
       />
     </div>
   );

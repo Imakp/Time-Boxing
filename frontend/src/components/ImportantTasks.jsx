@@ -121,9 +121,13 @@ export default function ImportantTasks({
                       {task.text}
                     </span>
                     <button
-                      onClick={() => {
-                        addTask(task._id);
-                        setShowPopup(false);
+                      onClick={async () => {
+                        try {
+                          await addTask(task._id);
+                          setShowPopup(false);
+                        } catch (error) {
+                          alert(error.message);
+                        }
                       }}
                       className="bg-slate-800 dark:bg-gray-700 text-slate-100 dark:text-gray-200 px-3 py-1 rounded-lg hover:bg-slate-700 dark:hover:bg-gray-600 transition-colors"
                     >
