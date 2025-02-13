@@ -2,7 +2,6 @@ import { useState, useEffect } from "react";
 import Navbar from "./components/Navbar";
 import Sidebar from "./components/Sidebar";
 import MainContent from "./components/MainContent";
-import { v4 as uuidv4 } from "uuid";
 import {
   getDailyTasks,
   createDailyTask,
@@ -29,7 +28,6 @@ function App() {
   const [dailyTasks, setDailyTasks] = useState([]);
   const [tasks, setTasks] = useState([]);
   const [selectedDate, setSelectedDate] = useState(null);
-  const [importantTasks, setImportantTasks] = useState([]);
 
   // Load daily tasks and all tasks
   useEffect(() => {
@@ -223,9 +221,9 @@ function App() {
 
   return (
     <div
-      className={`min-h-screen ${
+      className={`min-h-screen flex ${
         isDarkMode ? "dark" : ""
-      } bg-white dark:bg-gray-950`}
+      } bg-slate-100 dark:bg-gray-900`}
     >
       <Navbar
         isSidebarOpen={isSidebarOpen}

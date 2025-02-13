@@ -16,11 +16,10 @@ export default function MainContent({
   removeDayChartTask,
 }) {
   return (
-    <div
-      className={`pl-4 pt-16 overflow-hidden transition-margin duration-300
+    <main
+      className={`flex-1 pl-4 pt-16 overflow-hidden
         ${isSidebarOpen ? "lg:ml-64" : "ml-0"}
-        {/* ml-0 */}
-      `}
+        transition-all duration-300 ease-in-out`}
     >
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 h-full">
         <div className="col-span-1 space-y-4">
@@ -57,6 +56,6 @@ export default function MainContent({
           />
         </div>
       </div>
-    </div>
+    </main>
   );
 }
