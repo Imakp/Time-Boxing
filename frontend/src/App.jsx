@@ -6,6 +6,7 @@ import { v4 as uuidv4 } from 'uuid';
 import { getDailyTasks, createDailyTask, deleteDailyTask as deleteDailyTaskAPI } from './services/dailyTaskService';
 import { getTasks, createTask, updateTask, deleteTask } from './services/taskService';
 import { addImportantTask as addImportantTaskAPI, removeImportantTask as removeImportantTaskAPI } from './services/importantTaskService';
+import { addDayChartTask as addDayChartTaskAPI, removeDayChartTask as removeDayChartTaskAPI } from './services/dayChartService';
 
 function App() {
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
@@ -97,13 +98,14 @@ function App() {
   };
 
   // Filter tasks for the selected date
-  const currentDateTasks = tasks.filter(task => {
+  const currentDateTasks = selectedDate ? tasks.filter(task => {
+    if (!task.date) return false;
     const taskDate = new Date(task.date).toISOString().split('T')[0];
     return taskDate === selectedDate;
-  });
+  }) : [];
 
   // Filter important tasks for the selected date
-  const currentImportantTasks = currentDateTasks.filter(task => task.important);
+  const currentImportantTasks = selectedDate ? currentDateTasks.filter(task => task.important) : [];
 
   const handleAddImportantTask = async (taskId) => {
     if (!selectedDate) {
@@ -139,6 +141,49 @@ function App() {
     document.documentElement.classList.toggle("dark");
   };
 
+  const handleAddDayChartTask = async (taskId, startTime, endTime) => {
+    if (!selectedDate) {
+      alert("Please select a date first");
+      return;
+    }
+
+    // Find the existing task
+    const existingTask = tasks.find(t => t._id === taskId);
+    if (!existingTask) {
+      alert("Task not found");
+      return;
+    }
+
+    if (existingTask.isTimeBlock) {
+      alert("Task is already in day chart");
+      return;
+    }
+
+    try {
+      const updatedTask = await addDayChartTaskAPI(taskId, selectedDate, startTime, endTime);
+      if (updatedTask) {
+        setTasks(prev => prev.map(t => 
+          t._id === taskId ? { ...t, ...updatedTask } : t
+        ));
+      }
+    } catch (error) {
+      alert(error.message);
+    }
+  };
+
+  const handleRemoveDayChartTask = async (taskId) => {
+    try {
+      const updatedTask = await removeDayChartTaskAPI(taskId, selectedDate);
+      if (updatedTask) {
+        setTasks(prev => prev.map(t => 
+          t._id === taskId ? updatedTask : t
+        ));
+      }
+    } catch (error) {
+      alert('Failed to remove day chart task');
+    }
+  };
+
   return (
     <div className={`min-h-screen ${isDarkMode ? "dark" : ""} bg-white dark:bg-gray-950`}>
       <Navbar
@@ -166,6 +211,8 @@ function App() {
         importantTasks={currentImportantTasks}
         addImportantTask={handleAddImportantTask}
         deleteImportantTask={handleDeleteImportantTask}
+        addDayChartTask={handleAddDayChartTask}
+        removeDayChartTask={handleRemoveDayChartTask}
       />
     </div>
   );

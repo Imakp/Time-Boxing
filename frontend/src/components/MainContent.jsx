@@ -12,6 +12,8 @@ export default function MainContent({
   addImportantTask,
   deleteImportantTask,
   selectedDate,
+  addDayChartTask,
+  removeDayChartTask,
 }) {
   return (
     <div
@@ -39,10 +41,10 @@ export default function MainContent({
 
         <div className="col-span-1 lg:col-span-2">
           <DayChart
-            tasks={tasks.filter((t) => t.isTimeBlock)}
-            allTasks={tasks}
-            addTask={addTask}
-            deleteTask={deleteTask}
+            tasks={tasks.filter(t => t.isTimeBlock && new Date(t.date).toISOString().split('T')[0] === selectedDate)}
+            allTasks={tasks.filter(t => new Date(t.date).toISOString().split('T')[0] === selectedDate && !t.isTimeBlock)}
+            addTask={addDayChartTask}
+            deleteTask={removeDayChartTask}
             updateTask={updateTask}
           />
         </div>

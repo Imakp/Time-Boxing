@@ -40,12 +40,11 @@ export default function DayChart({
     if (newEntry.task && newEntry.startTime && newEntry.endTime) {
       if (!validateTime(newEntry.startTime, newEntry.endTime)) return;
 
-      addTask({
-        ...newEntry.task,
-        startTime: newEntry.startTime,
-        endTime: newEntry.endTime,
-        isTimeBlock: true,
-      });
+      addTask(
+        newEntry.task._id,
+        newEntry.startTime,
+        newEntry.endTime
+      );
 
       setShowPopup(false);
       setNewEntry({
@@ -59,9 +58,12 @@ export default function DayChart({
   const handleEditEntry = (updatedTask) => {
     if (!validateTime(updatedTask.startTime, updatedTask.endTime)) return;
 
-    const taskIndex = tasks.findIndex((t) => t.id === updatedTask.id);
-    if (taskIndex > -1) {
-      updateTask(taskIndex, updatedTask);
+    const taskToUpdate = tasks.find((t) => t._id === updatedTask._id);
+    if (taskToUpdate) {
+      updateTask(updatedTask._id, {
+        startTime: updatedTask.startTime,
+        endTime: updatedTask.endTime
+      });
       setShowEditPopup(false);
       setSelectedTask(null);
     }
@@ -82,8 +84,8 @@ export default function DayChart({
 
   const availableTasks = allTasks.filter(
     (task) =>
-      !tasks.some((t) => t.id === task.id) ||
-      (selectedTask && task.id === selectedTask.id)
+      !tasks.some((t) => t._id === task._id) ||
+      (selectedTask && task._id === selectedTask._id)
   );
 
   return (
@@ -238,24 +240,20 @@ export default function DayChart({
                 <select
                   className="w-full bg-white dark:bg-gray-800 rounded-lg px-4 py-2 text-slate-800 dark:text-gray-200"
                   onChange={(e) => {
-                    try {
-                      setNewEntry({
-                        ...newEntry,
-                        task: JSON.parse(e.target.value),
-                      });
-                    } catch (error) {
-                      console.error("Invalid JSON input");
-                    }
+                    const selectedTask = allTasks.find(t => t._id === e.target.value);
+                    setNewEntry({
+                      ...newEntry,
+                      task: selectedTask,
+                    });
                   }}
+                  value={newEntry.task?._id || ""}
                 >
                   <option value="">Select Task</option>
-                  {allTasks
-                    .filter((task) => !tasks.some((t) => t.id === task.id))
-                    .map((task) => (
-                      <option key={task.id} value={JSON.stringify(task)}>
-                        {task.text}
-                      </option>
-                    ))}
+                  {allTasks.map((task) => (
+                    <option key={task._id} value={task._id}>
+                      {task.text}
+                    </option>
+                  ))}
                 </select>
               </div>
 
